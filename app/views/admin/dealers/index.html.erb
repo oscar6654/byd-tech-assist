@@ -1,0 +1,79 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <div class="sm:flex sm:items-center sm:justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">Dealers</h1>
+    <%= link_to "New Dealer", new_admin_dealer_path, class: "mt-4 sm:mt-0 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="mt-6 hidden md:block">
+    <div class="overflow-hidden shadow ring-1 ring-black/5 rounded-lg">
+      <table class="min-w-full divide-y divide-gray-300">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Name</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Code</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dealer Group</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Contact</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+          <% @dealers.each do |dealer| %>
+            <tr>
+              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><%= dealer.name %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= dealer.code %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= dealer.dealer_group&.name %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= dealer.contact_number %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <% if dealer.active? %>
+                  <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Active</span>
+                <% else %>
+                  <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">Inactive</span>
+                <% end %>
+              </td>
+              <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                <div class="flex items-center justify-end gap-3">
+                  <%= link_to "Edit", edit_admin_dealer_path(dealer), class: "text-indigo-600 hover:text-indigo-900" %>
+                  <%= link_to "Delete", admin_dealer_path(dealer), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-900" %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="mt-6 space-y-4 md:hidden">
+    <% @dealers.each do |dealer| %>
+      <div class="rounded-lg bg-white p-4 shadow">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-medium text-gray-900"><%= dealer.name %></h3>
+          <% if dealer.active? %>
+            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Active</span>
+          <% else %>
+            <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">Inactive</span>
+          <% end %>
+        </div>
+        <div class="mt-2 text-sm text-gray-500">
+          <p>Code: <%= dealer.code %></p>
+          <p>Group: <%= dealer.dealer_group&.name %></p>
+          <p>Contact: <%= dealer.contact_number %></p>
+        </div>
+        <div class="mt-3 flex items-center gap-3 border-t border-gray-100 pt-3">
+          <%= link_to "Edit", edit_admin_dealer_path(dealer), class: "text-sm text-indigo-600 hover:text-indigo-900" %>
+          <%= link_to "Delete", admin_dealer_path(dealer), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "text-sm text-red-600 hover:text-red-900" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Pagination -->
+  <div class="mt-6 flex justify-center">
+    <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+  </div>
+</div>

@@ -1,0 +1,233 @@
+<div class="space-y-6">
+  <%# Header %>
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+          <span class="font-mono"><%= @tarf.tarf_number %></span>
+          <%= status_badge(@tarf.status) %>
+          <%= category_badge(@tarf.category) %>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900"><%= @tarf.title %></h1>
+      </div>
+      <% if @tarf.can_manage?(current_user) %>
+        <div class="flex items-center gap-2">
+          <% if @tarf.resolved? %>
+            <%= button_to "Reopen", reopen_tarf_path(@tarf), method: :patch, class: "px-4 py-2 text-sm font-medium text-orange-700 bg-orange-100 rounded-lg hover:bg-orange-200 transition-colors" %>
+          <% end %>
+          <%= link_to "Edit", edit_tarf_path(@tarf), class: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" %>
+          <%= button_to "Delete", tarf_path(@tarf), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this TARF?" }, class: "px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Info grid %>
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Created by</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tarf.user.full_name %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Dealer</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tarf.dealer.name %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">BYD Model</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tarf.byd_model&.name || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Created at</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tarf.created_at.strftime("%B %d, %Y %I:%M %p") %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Views</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @tarf.views_count %></dd>
+      </div>
+      <% if @tarf.keywords.present? %>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Keywords</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tarf.keywords %></dd>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Description %>
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+    <div class="prose prose-sm max-w-none text-gray-700"><%= simple_format(@tarf.description) %></div>
+    <% if @tarf.problem_summary.present? %>
+      <h3 class="text-md font-semibold text-gray-900 mt-4 mb-2">Problem Summary</h3>
+      <div class="prose prose-sm max-w-none text-gray-700"><%= simple_format(@tarf.problem_summary) %></div>
+    <% end %>
+  </div>
+
+  <%# Resolution section %>
+  <% if @tarf.resolved? %>
+    <div class="bg-green-50 border border-green-200 rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-green-900 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        Resolution
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <dt class="text-sm font-medium text-green-700">Part Number</dt>
+          <dd class="mt-1 text-sm text-green-900"><%= @tarf.part_number.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-green-700">Part Name</dt>
+          <dd class="mt-1 text-sm text-green-900"><%= @tarf.part_name.presence || "—" %></dd>
+        </div>
+        <div class="sm:col-span-2">
+          <dt class="text-sm font-medium text-green-700">Fix Description</dt>
+          <dd class="mt-1 text-sm text-green-900"><%= simple_format(@tarf.fix_description) %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-green-700">Resolved by</dt>
+          <dd class="mt-1 text-sm text-green-900"><%= @tarf.resolved_by&.full_name || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-green-700">Resolved at</dt>
+          <dd class="mt-1 text-sm text-green-900"><%= @tarf.resolved_at&.strftime("%B %d, %Y %I:%M %p") || "—" %></dd>
+        </div>
+      </div>
+    </div>
+  <% elsif @tarf.can_manage?(current_user) %>
+    <div class="bg-white rounded-lg shadow p-6" data-controller="tabs" id="resolve-section">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Resolve TARF</h2>
+      <%= form_with url: resolve_tarf_path(@tarf), method: :patch, scope: :tarf, class: "space-y-4" do |f| %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Part Number</label>
+            <%= f.text_field :part_number, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", required: true %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Part Name</label>
+            <%= f.text_field :part_name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm", required: true %>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Fix Description / Notes</label>
+          <%= f.text_area :fix_description, rows: 4, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+        </div>
+        <%= f.submit "Mark as Resolved", class: "px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# Files section %>
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Files</h2>
+    </div>
+
+    <div id="tarf_folders" class="space-y-3">
+      <%# Folders with files %>
+      <% @folders.each do |folder| %>
+        <div class="border border-gray-200 rounded-lg" id="folder_<%= folder.id %>" data-controller="collapsible">
+          <div class="flex items-center bg-gray-50 rounded-lg">
+            <button type="button" class="flex-1 flex items-center gap-2 px-4 py-3 hover:bg-gray-100 transition-colors text-left rounded-lg" data-action="click->collapsible#toggle">
+              <svg data-collapsible-target="icon" class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              <svg class="w-4 h-4 text-yellow-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              <span class="text-sm font-semibold text-gray-700"><%= folder.name %></span>
+              <span class="text-xs text-gray-400 font-normal">(<%= folder.tarf_attachments.count %> files)</span>
+            </button>
+            <% if @tarf.can_manage?(current_user) %>
+              <div class="px-3">
+                <%= link_to "Remove", tarf_tarf_folder_path(@tarf, folder), data: { turbo_method: :delete, turbo_confirm: "Delete this folder and all its files?" }, class: "text-xs text-red-500 hover:text-red-700" %>
+              </div>
+            <% end %>
+          </div>
+          <div data-collapsible-target="content" class="hidden">
+            <div class="p-4 space-y-2 border-t border-gray-200">
+              <% folder.tarf_attachments.each do |attachment| %>
+                <%= render "tarfs/tarf_attachments/attachment", attachment: attachment %>
+              <% end %>
+              <% if folder.tarf_attachments.empty? %>
+                <p class="text-sm text-gray-400 italic">No files in this folder.</p>
+              <% end %>
+              <% if @tarf.can_manage?(current_user) %>
+                <%= form_with url: tarf_tarf_attachments_path(@tarf), multipart: true, class: "mt-3 pt-3 border-t border-gray-100", data: { controller: "direct-upload" } do %>
+                  <%= hidden_field_tag "tarf_attachment[tarf_folder_id]", folder.id %>
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <%= file_field_tag "tarf_attachment[files][]", multiple: true, direct_upload: true, class: "w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100", data: { direct_upload_url: rails_direct_uploads_url, direct_upload_target: "input" } %>
+                    <%= submit_tag "Upload", class: "w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+                  </div>
+                  <div data-direct-upload-target="progress"></div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%# General attachments (no folder) %>
+      <div class="border border-gray-200 rounded-lg" id="general_attachments" data-controller="collapsible">
+        <button type="button" class="w-full flex items-center justify-between bg-gray-50 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left" data-action="click->collapsible#toggle">
+          <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <svg data-collapsible-target="icon" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            General
+            <span class="text-xs text-gray-400 font-normal">(<%= @general_attachments.count %> files)</span>
+          </h3>
+        </button>
+        <div data-collapsible-target="content" class="hidden">
+          <div class="p-4 space-y-2 border-t border-gray-200">
+            <% @general_attachments.each do |attachment| %>
+              <%= render "tarfs/tarf_attachments/attachment", attachment: attachment %>
+            <% end %>
+            <% if @general_attachments.empty? %>
+              <p class="text-sm text-gray-400 italic">No general files uploaded.</p>
+            <% end %>
+            <% if @tarf.can_manage?(current_user) %>
+              <%= form_with url: tarf_tarf_attachments_path(@tarf), multipart: true, class: "mt-3 pt-3 border-t border-gray-100", data: { controller: "direct-upload" } do %>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                  <%= file_field_tag "tarf_attachment[files][]", multiple: true, direct_upload: true, class: "w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100", data: { direct_upload_url: rails_direct_uploads_url, direct_upload_target: "input" } %>
+                  <%= submit_tag "Upload", class: "w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+                </div>
+                <div data-direct-upload-target="progress"></div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Add folder form %>
+    <% if @tarf.can_manage?(current_user) %>
+      <div class="mt-4">
+        <%= render "tarfs/tarf_folders/form", tarf: @tarf %>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Comments section %>
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Comments</h2>
+
+    <div class="space-y-4" id="tarf_<%= @tarf.id %>_comments">
+      <% @comments.each do |comment| %>
+        <%= render "tarfs/comments/comment", comment: comment %>
+      <% end %>
+    </div>
+
+    <% if @comments_pagy.pages > 1 %>
+      <div class="mt-4 flex justify-center">
+        <%== pagy_nav(@comments_pagy, page_param: :comments_page) %>
+      </div>
+    <% end %>
+
+    <div class="mt-6 border-t border-gray-200 pt-6">
+      <%= form_with url: tarf_comments_path(@tarf), scope: :tarf_comment, class: "space-y-3", id: "new_comment_form" do |f| %>
+        <div>
+          <%= f.text_area :body, rows: 3, placeholder: "Add a comment...", required: true, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
+        </div>
+        <div class="flex justify-end">
+          <%= f.submit "Post Comment", class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

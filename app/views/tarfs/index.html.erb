@@ -1,0 +1,94 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <%= page_title("TARFs") %>
+    <%= link_to "New TARF", new_tarf_path, class: "inline-flex items-center px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+  </div>
+
+  <%= form_with url: tarfs_path, method: :get, class: "bg-white rounded-lg shadow p-5", data: { controller: "search", turbo_frame: "tarfs_list", turbo_action: "advance" } do |f| %>
+    <div class="space-y-3">
+      <%= f.text_field :search, value: params[:search], placeholder: "Search TARFs...", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", data: { search_target: "input", action: "input->search#search" } %>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <%= f.select :status, options_for_select(Tarf.statuses.keys.map { |s| [s.humanize, s] }, params[:status]), { include_blank: "All Statuses" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", data: { action: "change->search#search" } %>
+        <%= f.select :category, options_for_select(Tarf.categories.keys.map { |c| [c == "tsb" ? "TSB" : c.humanize, c] }, params[:category]), { include_blank: "All Categories" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", data: { action: "change->search#search" } %>
+        <%= f.select :dealer_id, options_for_select(Dealer.active.sorted.map { |d| [d.display_name, d.id] }, params[:dealer_id]), { include_blank: "All Dealers" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", data: { action: "change->search#search" } %>
+        <%= f.select :byd_model_id, options_for_select(BydModel.active.sorted.map { |m| [m.name, m.id] }, params[:byd_model_id]), { include_blank: "All Models" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", data: { action: "change->search#search" } %>
+      </div>
+      <div>
+        <%= f.submit "Filter", class: "w-full sm:w-auto px-4 py-2.5 bg-gray-800 text-white text-sm font-medium rounded-lg hover:bg-gray-900 transition-colors cursor-pointer" %>
+      </div>
+    </div>
+  <% end %>
+
+  <%= turbo_frame_tag "tarfs_list", target: "_top" do %>
+    <%# Desktop table %>
+    <div class="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TARF #</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title / Problem</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BYD Model</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dealer</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @tarfs.each do |tarf| %>
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <%= link_to tarf.tarf_number, tarf, class: "text-blue-600 hover:text-blue-800 font-medium text-sm" %>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm font-medium text-gray-900"><%= link_to tarf.title, tarf, class: "hover:text-blue-600" %></div>
+                <% if tarf.problem_summary.present? %>
+                  <div class="text-sm text-gray-500 truncate max-w-xs"><%= tarf.problem_summary %></div>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><%= tarf.byd_model&.name || "—" %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><%= tarf.dealer.name %></td>
+              <td class="px-6 py-4 whitespace-nowrap"><%= category_badge(tarf.category) %></td>
+              <td class="px-6 py-4 whitespace-nowrap"><%= status_badge(tarf.status) %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= tarf.created_at.strftime("%b %d, %Y") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @tarfs.empty? %>
+        <div class="p-8 text-center text-gray-500">No TARFs found.</div>
+      <% end %>
+    </div>
+
+    <%# Mobile cards %>
+    <div class="md:hidden space-y-4">
+      <% @tarfs.each do |tarf| %>
+        <%= link_to tarf, class: "block bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow" do %>
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-xs font-mono text-gray-500"><%= tarf.tarf_number %></span>
+            <%= status_badge(tarf.status) %>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-900 mb-1"><%= tarf.title %></h3>
+          <% if tarf.problem_summary.present? %>
+            <p class="text-sm text-gray-500 mb-2 line-clamp-2"><%= tarf.problem_summary %></p>
+          <% end %>
+          <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+            <%= category_badge(tarf.category) %>
+            <span><%= tarf.byd_model&.name || "—" %></span>
+            <span>&middot;</span>
+            <span><%= tarf.dealer.name %></span>
+            <span>&middot;</span>
+            <span><%= tarf.created_at.strftime("%b %d, %Y") %></span>
+          </div>
+        <% end %>
+      <% end %>
+      <% if @tarfs.empty? %>
+        <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">No TARFs found.</div>
+      <% end %>
+    </div>
+
+    <div class="mt-6 flex justify-center">
+      <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,138 @@
+<div class="px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-2xl font-bold text-gray-900">System Settings</h1>
+
+  <!-- Tabs -->
+  <div class="mt-6" data-controller="tabs" data-tabs-active-tab-class="border-indigo-500 text-indigo-600" data-tabs-inactive-tab-class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+    <div class="border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button type="button" data-tabs-target="tab" data-action="click->tabs#select"
+                data-tabs-index="0"
+                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium border-indigo-500 text-indigo-600">
+          Email
+        </button>
+        <button type="button" data-tabs-target="tab" data-action="click->tabs#select"
+                data-tabs-index="1"
+                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+          AWS
+        </button>
+        <button type="button" data-tabs-target="tab" data-action="click->tabs#select"
+                data-tabs-index="2"
+                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+          Branding
+        </button>
+      </nav>
+    </div>
+
+    <%= form_tag update_settings_admin_system_settings_path, method: :patch, class: "mt-6" do %>
+
+      <!-- Email Tab -->
+      <div data-tabs-target="panel" class="space-y-6">
+        <div class="rounded-lg bg-white p-6 shadow">
+          <h3 class="text-lg font-medium text-gray-900">Email Configuration</h3>
+          <div class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label for="settings_email_provider" class="block text-sm font-medium text-gray-700">Email Provider</label>
+              <select name="settings[email_provider]" id="settings_email_provider" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <option value="smtp" <%= 'selected' if SystemSetting.get('email_provider') == 'smtp' %>>SMTP</option>
+                <option value="mailgun" <%= 'selected' if SystemSetting.get('email_provider') == 'mailgun' %>>Mailgun</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="settings_default_from_email" class="block text-sm font-medium text-gray-700">Default From Email</label>
+              <input type="email" name="settings[default_from_email]" id="settings_default_from_email"
+                     value="<%= SystemSetting.get('default_from_email') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+
+            <div>
+              <label for="settings_mailgun_api_key" class="block text-sm font-medium text-gray-700">Mailgun API Key</label>
+              <input type="password" name="settings[mailgun_api_key]" id="settings_mailgun_api_key"
+                     value="<%= SystemSetting.get('mailgun_api_key') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+
+            <div>
+              <label for="settings_mailgun_domain" class="block text-sm font-medium text-gray-700">Mailgun Domain</label>
+              <input type="text" name="settings[mailgun_domain]" id="settings_mailgun_domain"
+                     value="<%= SystemSetting.get('mailgun_domain') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <%= link_to "Send Test Email", test_email_admin_system_settings_path, data: { turbo_method: :post }, class: "inline-block rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- AWS Tab -->
+      <div data-tabs-target="panel" class="space-y-6 hidden">
+        <div class="rounded-lg bg-white p-6 shadow">
+          <h3 class="text-lg font-medium text-gray-900">AWS Configuration</h3>
+          <div class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label for="settings_aws_access_key_id" class="block text-sm font-medium text-gray-700">AWS Access Key ID</label>
+              <input type="text" name="settings[aws_access_key_id]" id="settings_aws_access_key_id"
+                     value="<%= SystemSetting.get('aws_access_key_id') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+
+            <div>
+              <label for="settings_aws_secret_access_key" class="block text-sm font-medium text-gray-700">AWS Secret Access Key</label>
+              <input type="password" name="settings[aws_secret_access_key]" id="settings_aws_secret_access_key"
+                     value="<%= SystemSetting.get('aws_secret_access_key') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+
+            <div>
+              <label for="settings_aws_region" class="block text-sm font-medium text-gray-700">AWS Region</label>
+              <input type="text" name="settings[aws_region]" id="settings_aws_region"
+                     value="<%= SystemSetting.get('aws_region') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+
+            <div>
+              <label for="settings_aws_bucket" class="block text-sm font-medium text-gray-700">AWS Bucket</label>
+              <input type="text" name="settings[aws_bucket]" id="settings_aws_bucket"
+                     value="<%= SystemSetting.get('aws_bucket') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <%= link_to "Test AWS Connection", test_aws_admin_system_settings_path, data: { turbo_method: :post }, class: "inline-block rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 cursor-pointer" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Branding Tab -->
+      <div data-tabs-target="panel" class="space-y-6 hidden">
+        <div class="rounded-lg bg-white p-6 shadow">
+          <h3 class="text-lg font-medium text-gray-900">Branding</h3>
+          <div class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label for="settings_company_name" class="block text-sm font-medium text-gray-700">Company Name</label>
+              <input type="text" name="settings[company_name]" id="settings_company_name"
+                     value="<%= SystemSetting.get('company_name') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+
+            <div>
+              <label for="settings_app_name" class="block text-sm font-medium text-gray-700">App Name</label>
+              <input type="text" name="settings[app_name]" id="settings_app_name"
+                     value="<%= SystemSetting.get('app_name') %>"
+                     class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <input type="submit" value="Save Settings" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer">
+      </div>
+
+    <% end %>
+  </div>
+</div>
