@@ -15,8 +15,9 @@ class Admin::SystemSettingsController < ApplicationController
   end
 
   def test_email
-    test_address = params[:test_email_address] || current_user.email
+    test_address = params[:test_email_address].presence || current_user.email
     begin
+      configure_mailer_from_settings!
       TestMailer.test_email(test_address).deliver_now
       SystemSetting.find_by(key: "mailgun_api_key")&.update(test_status: "success", last_tested_at: Time.current)
       redirect_to admin_system_settings_path, notice: "Test email sent to #{test_address}."
@@ -41,6 +42,22 @@ class Admin::SystemSettingsController < ApplicationController
     rescue => e
       SystemSetting.find_by(key: "aws_access_key_id")&.update(test_status: "failed", last_tested_at: Time.current)
       redirect_to admin_system_settings_path, alert: "AWS test failed: #{e.message}"
+    end
+  end
+
+  private
+
+  def configure_mailer_from_settings!
+    provider = SystemSetting.get("email_provider", "smtp")
+    if provider == "mailgun"
+      api_key = SystemSetting.get("mailgun_api_key")
+      domain = SystemSetting.get("mailgun_domain")
+      raise "Mailgun API key is not configured" if api_key.blank?
+      raise "Mailgun domain is not configured" if domain.blank?
+      ActionMailer::Base.delivery_method = :mailgun
+      ActionMailer::Base.mailgun_settings = { api_key: api_key, domain: domain }
+    else
+      raise "Email provider is set to '#{provider}'. Change it to 'mailgun', save settings, then test."
     end
   end
 end
