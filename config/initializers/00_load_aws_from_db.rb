@@ -9,7 +9,7 @@ Rails.application.config.after_initialize do
       )
       aws_region = ActiveRecord::Base.connection.select_value(
         "SELECT value FROM system_settings WHERE key = 'aws_region' LIMIT 1"
-      )
+      ) || "ap-southeast-1"
       aws_bucket = ActiveRecord::Base.connection.select_value(
         "SELECT value FROM system_settings WHERE key = 'aws_bucket' LIMIT 1"
       )
@@ -20,30 +20,32 @@ Rails.application.config.after_initialize do
       ENV["AWS_BUCKET"] = aws_bucket if aws_bucket.present?
 
       if aws_bucket.present? && aws_access_key.present? && aws_secret_key.present?
-        Rails.logger.info "AWS S3 credentials found in SystemSettings — configuring Active Storage with S3 (bucket=#{aws_bucket}, region=#{aws_region})"
-        configure_active_storage_s3(aws_access_key, aws_secret_key, aws_region || "ap-southeast-1", aws_bucket)
+        Rails.logger.info "AWS ENV loaded from SystemSettings: bucket=#{aws_bucket}, region=#{aws_region}"
+
+        amazon_config = {
+          "service" => "S3",
+          "access_key_id" => aws_access_key,
+          "secret_access_key" => aws_secret_key,
+          "region" => aws_region,
+          "bucket" => aws_bucket
+        }
+
+        configs = Rails.configuration.active_storage.service_configurations ||= {}
+        configs["amazon"] = amazon_config
+
+        ActiveStorage::Blob.services = ActiveStorage::Service::Registry.new(configs)
+        ActiveStorage::Blob.service = ActiveStorage::Blob.services.fetch(:amazon)
+
+        Rails.configuration.active_storage.service = :amazon
+
+        Rails.logger.info "ActiveStorage S3 configured for bucket '#{aws_bucket}' in region '#{aws_region}'"
       else
-        Rails.logger.info "AWS S3 credentials not configured — using local storage. Add credentials in Admin > System Settings > AWS and restart the server."
+        Rails.logger.info "AWS S3 credentials not fully configured — using local storage"
       end
     end
+  rescue ActiveRecord::NoDatabaseError, ActiveRecord::StatementInvalid => e
+    Rails.logger.warn "Could not load AWS settings from database: #{e.message}"
   rescue => e
-    Rails.logger.warn "Could not load AWS settings from DB: #{e.message}"
+    Rails.logger.warn "Could not configure AWS: #{e.message}"
   end
-end
-
-def configure_active_storage_s3(access_key_id, secret_access_key, region, bucket)
-  require "aws-sdk-s3"
-  config = {
-    amazon: {
-      service: "S3",
-      access_key_id: access_key_id,
-      secret_access_key: secret_access_key,
-      region: region,
-      bucket: bucket
-    }
-  }
-  ActiveStorage::Blob.service = ActiveStorage::Service.configure(:amazon, config)
-  Rails.logger.info "Active Storage switched to S3 successfully"
-rescue => e
-  Rails.logger.warn "Could not configure Active Storage S3, falling back to local: #{e.message}"
 end
