@@ -149,14 +149,17 @@
                 <p class="text-sm text-gray-400 italic">No files in this folder.</p>
               <% end %>
               <% if @tarf.can_manage?(current_user) %>
-                <%= form_with url: tarf_tarf_attachments_path(@tarf), multipart: true, class: "mt-3 pt-3 border-t border-gray-100", data: { controller: "direct-upload" } do %>
-                  <%= hidden_field_tag "tarf_attachment[tarf_folder_id]", folder.id %>
-                  <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <%= file_field_tag "tarf_attachment[files][]", multiple: true, direct_upload: true, class: "w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100", data: { direct_upload_url: rails_direct_uploads_url, direct_upload_target: "input" } %>
-                    <%= submit_tag "Upload", class: "w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
-                  </div>
-                  <div data-direct-upload-target="progress"></div>
-                <% end %>
+                <div data-controller="file-compressor">
+                  <%= form_with url: tarf_tarf_attachments_path(@tarf), multipart: true, class: "mt-3 pt-3 border-t border-gray-100", data: { controller: "direct-upload" } do %>
+                    <%= hidden_field_tag "tarf_attachment[tarf_folder_id]", folder.id %>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <%= file_field_tag "tarf_attachment[files][]", multiple: true, direct_upload: true, class: "w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100", data: { direct_upload_url: rails_direct_uploads_url, direct_upload_target: "input", file_compressor_target: "input" } %>
+                      <%= submit_tag "Upload", class: "w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+                    </div>
+                    <div data-file-compressor-target="status"></div>
+                    <div data-direct-upload-target="progress"></div>
+                  <% end %>
+                </div>
               <% end %>
             </div>
           </div>
@@ -182,13 +185,16 @@
               <p class="text-sm text-gray-400 italic">No general files uploaded.</p>
             <% end %>
             <% if @tarf.can_manage?(current_user) %>
-              <%= form_with url: tarf_tarf_attachments_path(@tarf), multipart: true, class: "mt-3 pt-3 border-t border-gray-100", data: { controller: "direct-upload" } do %>
-                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                  <%= file_field_tag "tarf_attachment[files][]", multiple: true, direct_upload: true, class: "w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100", data: { direct_upload_url: rails_direct_uploads_url, direct_upload_target: "input" } %>
-                  <%= submit_tag "Upload", class: "w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
-                </div>
-                <div data-direct-upload-target="progress"></div>
-              <% end %>
+              <div data-controller="file-compressor">
+                <%= form_with url: tarf_tarf_attachments_path(@tarf), multipart: true, class: "mt-3 pt-3 border-t border-gray-100", data: { controller: "direct-upload" } do %>
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <%= file_field_tag "tarf_attachment[files][]", multiple: true, direct_upload: true, class: "w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100", data: { direct_upload_url: rails_direct_uploads_url, direct_upload_target: "input", file_compressor_target: "input" } %>
+                    <%= submit_tag "Upload", class: "w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+                  </div>
+                  <div data-file-compressor-target="status"></div>
+                  <div data-direct-upload-target="progress"></div>
+                <% end %>
+              </div>
             <% end %>
           </div>
         </div>

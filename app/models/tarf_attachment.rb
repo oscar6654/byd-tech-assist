@@ -11,6 +11,7 @@ class TarfAttachment < ApplicationRecord
 
   before_validation :detect_file_type, if: -> { file.attached? }
   before_validation :set_file_name, if: -> { file.attached? && file_name.blank? }
+  after_create_commit :enqueue_video_compression, if: :video?
 
   scope :images, -> { where(file_type: :image) }
   scope :videos, -> { where(file_type: :video) }
@@ -45,5 +46,9 @@ class TarfAttachment < ApplicationRecord
 
   def set_file_name
     self.file_name = file.filename.to_s
+  end
+
+  def enqueue_video_compression
+    VideoCompressionJob.perform_later(id)
   end
 end
