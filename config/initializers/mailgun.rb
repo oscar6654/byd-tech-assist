@@ -26,7 +26,7 @@ class MailgunDeliveryMethod
     mg_client = Mailgun::Client.new(api_key)
 
     message_params = {
-      from: mail.from&.first || SystemSetting.get("default_from_email", "noreply@example.com"),
+      from: mail.from&.first || SystemSetting.get("default_from_email", "noreply@valuesalesinc.com"),
       to: mail.to&.join(", "),
       subject: mail.subject
     }
