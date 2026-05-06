@@ -64,6 +64,27 @@
     <% end %>
   </div>
 
+  <%# TARF PDF %>
+  <% if @tarf.tarf_pdf.attached? %>
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
+        TARF Document
+      </h2>
+      <div class="flex items-center gap-3">
+        <%= link_to rails_blob_path(@tarf.tarf_pdf, disposition: "inline"), target: "_blank", class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          View PDF
+        <% end %>
+        <%= link_to rails_blob_path(@tarf.tarf_pdf, disposition: "attachment"), class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download
+        <% end %>
+        <span class="text-xs text-gray-400"><%= @tarf.tarf_pdf.filename %> (<%= number_to_human_size(@tarf.tarf_pdf.byte_size) %>)</span>
+      </div>
+    </div>
+  <% end %>
+
   <%# Resolution section %>
   <% if @tarf.resolved? %>
     <div class="bg-green-50 border border-green-200 rounded-lg shadow p-6">

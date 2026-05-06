@@ -100,6 +100,6 @@ class TarfsController < ApplicationController
   end
 
   def tarf_params
-    params.require(:tarf).permit(:title, :description, :problem_summary, :byd_model_id, :dealer_id, :category, :keywords)
+    params.require(:tarf).permit(:title, :description, :problem_summary, :byd_model_id, :dealer_id, :category, :keywords, :tarf_pdf)
   end
 end

@@ -10,6 +10,8 @@ class Tarf < ApplicationRecord
   has_many :tarf_attachments, dependent: :destroy
   has_many :tarf_comments, dependent: :destroy
 
+  has_one_attached :tarf_pdf
+
   enum :category, { warranty: 0, general: 1, recall: 2, tsb: 3 }
   enum :status, { open: 0, in_progress: 1, resolved: 2, closed: 3 }
 

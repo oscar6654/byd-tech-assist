@@ -49,6 +49,19 @@
     <%= f.text_field :keywords, placeholder: "e.g. battery, AC, steering", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
   </div>
 
+  <div>
+    <%= f.label :tarf_pdf, "TARF PDF Document", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <% if @tarf.tarf_pdf.attached? %>
+      <div class="flex items-center gap-2 mb-2 text-sm text-gray-600">
+        <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
+        <%= link_to @tarf.tarf_pdf.filename, rails_blob_path(@tarf.tarf_pdf, disposition: "inline"), target: "_blank", class: "text-blue-600 hover:underline" %>
+        <span class="text-gray-400">(<%= number_to_human_size(@tarf.tarf_pdf.byte_size) %>)</span>
+      </div>
+    <% end %>
+    <%= f.file_field :tarf_pdf, accept: "application/pdf", class: "w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-red-50 file:text-red-700 hover:file:bg-red-100" %>
+    <p class="mt-1 text-xs text-gray-400">Upload the TARF PDF document (optional). Only PDF files accepted.</p>
+  </div>
+
   <div class="flex items-center gap-3 pt-3">
     <%= f.submit class: "px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
     <%= link_to "Cancel", @tarf.persisted? ? tarf_path(@tarf) : tarfs_path, class: "px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" %>
